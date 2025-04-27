@@ -1,21 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const MigrationCalculator = () => {
+interface ChartDataPoint {
+  date: string;
+  remainingDocs: number;
+  event: string;
+}
+
+const MigrationCalculator: React.FC = () => {
   // State für alle Eingabeparameter
-  const [documentCount, setDocumentCount] = useState(1000000);
-  const [timePerDocument, setTimePerDocument] = useState(5);
-  const [releaseDate, setReleaseDate] = useState(new Date('2026-03-01'));
-  const [startDate, setStartDate] = useState(new Date('2025-08-01'));
-  const [interruptions, setInterruptions] = useState(2);
-  const [renameOverhead, setRenameOverhead] = useState(10);
-  const [parallelFactor, setParallelFactor] = useState(1);
-  const [parallelImplTime, setParallelImplTime] = useState(5);
+  const [documentCount, setDocumentCount] = useState<number>(1000000);
+  const [timePerDocument, setTimePerDocument] = useState<number>(5);
+  const [releaseDate, setReleaseDate] = useState<Date>(new Date('2026-03-01'));
+  const [startDate, setStartDate] = useState<Date>(new Date('2025-08-01'));
+  const [interruptions, setInterruptions] = useState<number>(2);
+  const [renameOverhead, setRenameOverhead] = useState<number>(10);
+  const [parallelFactor, setParallelFactor] = useState<number>(1);
+  const [parallelImplTime, setParallelImplTime] = useState<number>(5);
   
   // Berechnete Werte
-  const [endDate, setEndDate] = useState(null);
-  const [chartData, setChartData] = useState([]);
-  const [isOnTime, setIsOnTime] = useState(true);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
+  const [isOnTime, setIsOnTime] = useState<boolean>(true);
   
   // Berechnung beim Ändern eines Parameters
   useEffect(() => {
@@ -23,7 +29,7 @@ const MigrationCalculator = () => {
   }, [documentCount, timePerDocument, releaseDate, startDate, interruptions, renameOverhead, parallelFactor, parallelImplTime]);
   
   // Hilfsfunktion zum Formatieren von Daten
-  const formatDate = (date) => {
+  const formatDate = (date: Date): string => {
     return date.toLocaleDateString('de-DE', { 
       year: 'numeric', 
       month: 'long', 
@@ -32,7 +38,7 @@ const MigrationCalculator = () => {
   };
   
   // Hauptberechnungsfunktion
-  const calculateMigration = () => {
+  const calculateMigration = (): void => {
     // Berechnung der Anzahl an Dokumenten pro Tag
     // Annahme: 8 Stunden Arbeitszeit pro Tag, 5 Tage pro Woche
     const secondsPerDay = 8 * 60 * 60; // 8 Stunden in Sekunden
@@ -49,7 +55,7 @@ const MigrationCalculator = () => {
     let daysProcessed = 0;
     let documentsProcessed = 0;
     let interruptionsLeft = interruptions;
-    let interruptionEndDates = [];
+    let interruptionEndDates: Date[] = [];
     
     // Overhead für Umbenennungen in Tagen am Anfang hinzufügen
     if (renameOverhead > 0) {
@@ -63,7 +69,7 @@ const MigrationCalculator = () => {
     
     // Generiere zufällige Wochen für Unterbrechungen
     const totalWeeks = Math.ceil(requiredDays / 5);
-    const interruptionWeeks = [];
+    const interruptionWeeks: number[] = [];
     
     for (let i = 0; i < interruptions; i++) {
       const randomWeek = Math.floor(Math.random() * totalWeeks);
@@ -79,7 +85,7 @@ const MigrationCalculator = () => {
     interruptionWeeks.sort((a, b) => a - b);
     
     // Generiere Daten für den Chart
-    const data = [];
+    const data: ChartDataPoint[] = [];
     
     // Startpunkt für den Chart
     data.push({
@@ -167,7 +173,7 @@ const MigrationCalculator = () => {
   };
   
   // Hilfsfunktion zum Hinzufügen von Arbeitstagen
-  const addBusinessDays = (date, days) => {
+  const addBusinessDays = (date: Date, days: number): Date => {
     const result = new Date(date);
     let addedDays = 0;
     
@@ -182,7 +188,7 @@ const MigrationCalculator = () => {
   };
   
   // Format für numerische Werte mit Tausendertrennzeichen
-  const formatNumber = (num) => {
+  const formatNumber = (num: number): string => {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
 
