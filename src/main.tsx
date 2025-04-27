@@ -1,27 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import { StrictMode, useState, useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import './index.css';
 
-interface ChartDataPoint {
-  date: string;
-  remainingDocs: number;
-  event: string;
-}
-
-const MigrationCalculator: React.FC = () => {
+const MigrationCalculator = () => {
   // State für alle Eingabeparameter
-  const [documentCount, setDocumentCount] = useState<number>(1000000);
-  const [timePerDocument, setTimePerDocument] = useState<number>(5);
-  const [releaseDate, setReleaseDate] = useState<Date>(new Date('2026-03-01'));
-  const [startDate, setStartDate] = useState<Date>(new Date('2025-08-01'));
-  const [interruptions, setInterruptions] = useState<number>(2);
-  const [renameOverhead, setRenameOverhead] = useState<number>(10);
-  const [parallelFactor, setParallelFactor] = useState<number>(1);
-  const [parallelImplTime, setParallelImplTime] = useState<number>(5);
+  const [documentCount, setDocumentCount] = useState(1000000);
+  const [timePerDocument, setTimePerDocument] = useState(5);
+  const [releaseDate, setReleaseDate] = useState(new Date('2026-03-01'));
+  const [startDate, setStartDate] = useState(new Date('2025-08-01'));
+  const [interruptions, setInterruptions] = useState(2);
+  const [renameOverhead, setRenameOverhead] = useState(10);
+  const [parallelFactor, setParallelFactor] = useState(1);
+  const [parallelImplTime, setParallelImplTime] = useState(5);
   
   // Berechnete Werte
-  const [endDate, setEndDate] = useState<Date | null>(null);
-  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
-  const [isOnTime, setIsOnTime] = useState<boolean>(true);
+  const [endDate, setEndDate] = useState<Date | null>(null); // Added type annotation
+  const [chartData, setChartData] = useState<any[]>([]); // Added type annotation
+  const [isOnTime, setIsOnTime] = useState(true);
   
   // Berechnung beim Ändern eines Parameters
   useEffect(() => {
@@ -29,7 +25,7 @@ const MigrationCalculator: React.FC = () => {
   }, [documentCount, timePerDocument, releaseDate, startDate, interruptions, renameOverhead, parallelFactor, parallelImplTime]);
   
   // Hilfsfunktion zum Formatieren von Daten
-  const formatDate = (date: Date): string => {
+  const formatDate = (date: Date): string => { // Added type annotation
     return date.toLocaleDateString('de-DE', { 
       year: 'numeric', 
       month: 'long', 
@@ -38,7 +34,7 @@ const MigrationCalculator: React.FC = () => {
   };
   
   // Hauptberechnungsfunktion
-  const calculateMigration = (): void => {
+  const calculateMigration = () => {
     // Berechnung der Anzahl an Dokumenten pro Tag
     // Annahme: 8 Stunden Arbeitszeit pro Tag, 5 Tage pro Woche
     const secondsPerDay = 8 * 60 * 60; // 8 Stunden in Sekunden
@@ -55,7 +51,7 @@ const MigrationCalculator: React.FC = () => {
     let daysProcessed = 0;
     let documentsProcessed = 0;
     let interruptionsLeft = interruptions;
-    let interruptionEndDates: Date[] = [];
+    let interruptionEndDates: Date[] = []; // Added type annotation
     
     // Overhead für Umbenennungen in Tagen am Anfang hinzufügen
     if (renameOverhead > 0) {
@@ -69,7 +65,7 @@ const MigrationCalculator: React.FC = () => {
     
     // Generiere zufällige Wochen für Unterbrechungen
     const totalWeeks = Math.ceil(requiredDays / 5);
-    const interruptionWeeks: number[] = [];
+    const interruptionWeeks: number[] = []; // Added type annotation
     
     for (let i = 0; i < interruptions; i++) {
       const randomWeek = Math.floor(Math.random() * totalWeeks);
@@ -85,7 +81,7 @@ const MigrationCalculator: React.FC = () => {
     interruptionWeeks.sort((a, b) => a - b);
     
     // Generiere Daten für den Chart
-    const data: ChartDataPoint[] = [];
+    const data: any[] = []; // Added type annotation
     
     // Startpunkt für den Chart
     data.push({
@@ -173,7 +169,7 @@ const MigrationCalculator: React.FC = () => {
   };
   
   // Hilfsfunktion zum Hinzufügen von Arbeitstagen
-  const addBusinessDays = (date: Date, days: number): Date => {
+  const addBusinessDays = (date: Date, days: number): Date => { // Added type annotations
     const result = new Date(date);
     let addedDays = 0;
     
@@ -188,7 +184,7 @@ const MigrationCalculator: React.FC = () => {
   };
   
   // Format für numerische Werte mit Tausendertrennzeichen
-  const formatNumber = (num: number): string => {
+  const formatNumber = (num: number): string => { // Added type annotation
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
 
@@ -370,8 +366,8 @@ const MigrationCalculator: React.FC = () => {
               <h3 className="font-medium">Migrationsstatus</h3>
               <p className={isOnTime ? "text-green-700" : "text-red-700"}>
                 {isOnTime ? 
-                  `Migration wird rechtzeitig bis zum Release am ${formatDate(releaseDate)} abgeschlossen sein.` : 
-                  `Migration wird NICHT rechtzeitig bis zum Release am ${formatDate(releaseDate)} abgeschlossen sein!`
+                  `Migration wird rechtzeitig bis zum Release am ${endDate ? formatDate(releaseDate) : '??'} abgeschlossen sein.` : // Added check for endDate
+                  `Migration wird NICHT rechtzeitig bis zum Release am ${endDate ? formatDate(releaseDate) : '??'} abgeschlossen sein!` // Added check for endDate
                 }
               </p>
             </div>
@@ -424,8 +420,8 @@ const MigrationCalculator: React.FC = () => {
             />
             <YAxis tick={{fontSize: 12}} />
             <Tooltip 
-              formatter={(value) => [formatNumber(value), "Verbleibende Dokumente"]}
-              labelFormatter={(label) => `Datum: ${label}`}
+              formatter={(value: number) => [formatNumber(value), "Verbleibende Dokumente"]} // Added type annotation
+              labelFormatter={(label: string) => `Datum: ${label}`} // Added type annotation
             />
             <Legend />
             <Line 
@@ -454,4 +450,8 @@ const MigrationCalculator: React.FC = () => {
   );
 };
 
-export default MigrationCalculator;
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <MigrationCalculator /> {/* Render MigrationCalculator directly */}
+  </StrictMode>,
+)
